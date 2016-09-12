@@ -1,5 +1,5 @@
 # Path to your oh-my-zsh installation.
-  export ZSH=/home/michael/.oh-my-zsh
+export ZSH=/home/michael/.oh-my-zsh
 
 # Set name of the theme to load.
 # Look in ~/.oh-my-zsh/themes/
@@ -79,6 +79,11 @@ source $ZSH/oh-my-zsh.sh
 # users are encouraged to define aliases within the ZSH_CUSTOM folder.
 # For a full list of active aliases, run `alias`.
 #
+alias uwaterloo="ssh mnoukhov@linux.student.cs.uwaterloo.ca"
+alias ugster="ssh mnoukhov@ugster19.student.cs.uwaterloo.ca"
+
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
