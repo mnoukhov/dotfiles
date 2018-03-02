@@ -17,6 +17,7 @@ Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'jistr/vim-nerdtree-tabs'
 Plug 'junegunn/seoul256.vim'
+Plug 'junegunn/goyo.vim'
 
 " Langs
 Plug 'klen/python-mode'
@@ -49,31 +50,32 @@ let g:pymode_lint_ignore = "E,W601"
 let g:pymode_python = 'python3'
 let g:pymode_syntax_space_errors = 0
 
-" powerline on fedora terminal
 syntax enable
 if has('gui_running')
-	set guioptions-=r		" remove right scrollbar
-	set guioptions-=L		" remove left scrollbar
-	set guioptions-=T		" remove toolbar
-	set guioptions-=e		" make tabline good
-	set guioptions-=m		" remove menubar
-	set guifont=Monospace\ 11
-	let g:airline_theme='bubblegum'
-	colo seoul256
-	let g:seoul256_background = 235
-	set background=dark
-	set encoding=utf8
+    set guioptions-=r		" remove right scrollbar
+    set guioptions-=L		" remove left scrollbar
+    set guioptions-=T		" remove toolbar
+    set guioptions-=e		" make tabline good
+    set guioptions-=m		" remove menubar
+    set guifont=Monospace\ 11
+    let g:airline_theme='bubblegum'
+    set encoding=utf8
 else
-	python3 from powerline.vim import setup as powerline_setup
-	python3 powerline_setup()
-	python3 del powerline_setup
+    " powerline on fedora terminal
+    python3 from powerline.vim import setup as powerline_setup
+    python3 powerline_setup()
+    python3 del powerline_setup
+    let g:airline_theme='bubblegum'
 endif
 
+
+" Colors
+colo seoul256
+let g:seoul256_background = 235
 
 " Airline
 set laststatus=2 " Always display the statusline in all windows
 set noshowmode " Hide the default mode text (e.g. -- INSERT -- below the statusline)
-set t_Co=256
 
 " vimtex
 let g:vimtex_compiler_latexmk = {'callback' : 0}
