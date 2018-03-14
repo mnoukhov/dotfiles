@@ -31,17 +31,38 @@ set tabstop=4		" tabs are 4 spaces
 set shiftwidth=4	" indents are 4 spaces
 set autoindent		" go back to the line
 set nobackup        " get rid of anoying ~file
-let mapleader = '\'
-set title		" makes title bar display name
+set title		    " makes title bar display name
 set expandtab
-inoremap jj <Esc>
-" don't overwrite on paste
-xnoremap p pgvy
-" Clear highlighting on escape in normal mode
-nnoremap <esc> :noh<return><esc>
-nnoremap <esc>^[ <esc>^[
+syntax enable
+filetype plugin indent on
 " trim trailing whitespace on buffer save
 autocmd BufWritePre * %s/\s\+$//e
+
+
+" Remaps
+let mapleader = '\'
+inoremap jj <Esc>
+"don't overwrite on paste
+xnoremap p pgvy
+"clear highlighting on escape in normal mode
+nnoremap <esc> :noh<return><esc>
+nnoremap <esc>^[ <esc>^[
+
+
+" UI
+let g:seoul256_srgb = 1
+set t_Co=256
+colo seoul256
+if has('gui_running')
+    set guioptions-=r		" remove right scrollbar
+    set guioptions-=L		" remove left scrollbar
+    set guioptions-=T		" remove toolbar
+    set guioptions-=e		" make tabline good
+    set guioptions-=m		" remove menubar
+    set guifont=Monospace\ 11
+    set encoding=utf8
+endif
+
 
 " Python-mode
 let g:pymode_rope = 0
@@ -50,32 +71,10 @@ let g:pymode_lint_ignore = "E,W601"
 let g:pymode_python = 'python3'
 let g:pymode_syntax_space_errors = 0
 
-syntax enable
-if has('gui_running')
-    set guioptions-=r		" remove right scrollbar
-    set guioptions-=L		" remove left scrollbar
-    set guioptions-=T		" remove toolbar
-    set guioptions-=e		" make tabline good
-    set guioptions-=m		" remove menubar
-    set guifont=Monospace\ 11
-    let g:airline_theme='bubblegum'
-    set encoding=utf8
-else
-    " powerline on fedora terminal
-    python3 from powerline.vim import setup as powerline_setup
-    python3 powerline_setup()
-    python3 del powerline_setup
-    let g:airline_theme='bubblegum'
-endif
-
-
-" Colors
-colo seoul256
-let g:seoul256_background = 235
-
 " Airline
-set laststatus=2 " Always display the statusline in all windows
-set noshowmode " Hide the default mode text (e.g. -- INSERT -- below the statusline)
+set laststatus=2    " Always display the statusline in all windows
+set noshowmode      " Don't display mode name (e.g. Insert) below airline
+let g:airline_theme='bubblegum'
 
 " vimtex
 let g:vimtex_compiler_latexmk = {'callback' : 0}
