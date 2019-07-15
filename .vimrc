@@ -1,5 +1,4 @@
 call plug#begin('~/.vim/plugged')
-
 " Utility
 Plug 'scrooloose/nerdcommenter'
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
@@ -20,6 +19,7 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'jistr/vim-nerdtree-tabs'
 Plug 'junegunn/seoul256.vim'
 Plug 'junegunn/goyo.vim'
+Plug 'edkolev/tmuxline.vim'
 
 " Langs
 Plug 'klen/python-mode', {'branch': 'develop'}
@@ -145,3 +145,13 @@ set completeopt=noinsert,menuone,noselect
 
 inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
 inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+
+" Tmuxline
+let g:tmuxline_preset = {
+            \ 'a'    : '#S',
+            \'win'  : '#I #W',
+            \'cwin' : '#I #W',
+            \ 'z'    : '#H',
+            \'options': {
+            \'status-justify': 'left'},
+            \}
