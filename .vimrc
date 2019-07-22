@@ -8,9 +8,10 @@ Plug 'honza/vim-snippets'
 Plug 'eshion/vim-sync'
 Plug 'tpope/vim-fugitive'
 Plug 'ctrlpvim/ctrlp.vim'
-Plug 'Konfekt/FastFold'
+Plug 'konfekt/fastfold'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'mileszs/ack.vim'
+Plug 'scrooloose/syntastic'
 
 " Aesthetics
 Plug 'altercation/vim-colors-solarized'
@@ -22,10 +23,9 @@ Plug 'junegunn/goyo.vim'
 Plug 'edkolev/tmuxline.vim'
 
 " Langs
-Plug 'klen/python-mode', {'branch': 'develop'}
 Plug 'tmhedberg/SimpylFold'
 Plug 'lervag/vimtex'
-Plug 'scrooloose/syntastic'
+Plug 'sheerun/vim-polyglot'
 
 " Autocompletion
 Plug 'ncm2/ncm2'
@@ -87,15 +87,6 @@ if has('gui_running')
     set encoding=utf8
 endif
 
-
-" Python-Mode
-let g:pymode_python = 'python3'
-let g:pymode_options_colorcolumn = 0
-let g:pymode_lint = 0
-let g:pymode_lint_ignore = "E,W601"
-let g:pymode_syntax_space_errors = 0
-let g:pymode_folding = 0
-let g:pymode_rope_completion = 0
 
 " Airline
 set laststatus=2    " Always display the statusline in all windows
