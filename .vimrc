@@ -14,7 +14,6 @@ Plug 'mileszs/ack.vim'
 Plug 'scrooloose/syntastic'
 
 " Aesthetics
-Plug 'altercation/vim-colors-solarized'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'jistr/vim-nerdtree-tabs'
@@ -74,9 +73,9 @@ nnoremap <esc>^[ <esc>^[
 :nnoremap <C-l> :buffer<Space><tab>
 
 " UI
+set termguicolors
 let g:seoul256_srgb = 1
-set t_Co=256
-colo seoul256
+colorscheme seoul256
 if has('gui_running')
     set guioptions-=r       " remove right scrollbar
     set guioptions-=L       " remove left scrollbar

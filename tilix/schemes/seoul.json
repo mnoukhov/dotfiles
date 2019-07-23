@@ -1,0 +1,31 @@
+{
+    "background-color": "#3A3A3A",
+    "badge-color": "#AC7EA8",
+    "bold-color": "#E4E4E4",
+    "foreground-color": "#D0D0D0",
+    "name": "Seoul",
+    "palette": [
+        "#4E4E4E",
+        "#D68787",
+        "#5F865F",
+        "#D8AF5F",
+        "#85ADD4",
+        "#D7AFAF",
+        "#87AFAF",
+        "#D0D0D0",
+        "#626262",
+        "#D75F87",
+        "#87AF87",
+        "#FFD787",
+        "#ADD4FB",
+        "#FFAFAF",
+        "#87D7D7",
+        "#E4E4E4"
+    ],
+    "use-bold-color": true,
+    "use-badge-color": false,
+    "use-cursor-color": false,
+    "use-highlight-color": false,
+    "use-theme-colors": false,
+    "use-theme-background": false
+}
