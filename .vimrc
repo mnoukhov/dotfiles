@@ -7,17 +7,18 @@ Plug 'sirver/ultisnips'
 Plug 'honza/vim-snippets'
 Plug 'eshion/vim-sync'
 Plug 'tpope/vim-fugitive'
-Plug 'ctrlpvim/ctrlp.vim'
 Plug 'konfekt/fastfold'
 Plug 'editorconfig/editorconfig-vim'
-Plug 'mileszs/ack.vim'
 Plug 'scrooloose/syntastic'
+Plug '~/.fzf'
+Plug 'junegunn/fzf.vim'
 
 " Aesthetics
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'jistr/vim-nerdtree-tabs'
 Plug 'junegunn/seoul256.vim'
+Plug 'altercation/vim-colors-solarized'
 Plug 'junegunn/goyo.vim'
 Plug 'edkolev/tmuxline.vim'
 
@@ -45,7 +46,6 @@ set autoindent      " go back to the line
 set nobackup        " get rid of anoying ~file
 set title           " makes title bar display name
 set number          " shows numbers
-autocmd BufWritePre * %s/\s\+$//e " trim trailing whitespace on save
 syntax on
 filetype plugin indent on
 set wildcharm=<tab>
@@ -73,9 +73,10 @@ nnoremap <esc>^[ <esc>^[
 :nnoremap <C-l> :buffer<Space><tab>
 
 " UI
-set termguicolors
-let g:seoul256_srgb = 1
-colorscheme seoul256
+"let g:seoul256_srgb = 1
+set t_Co=256
+set background=dark
+colorscheme solarized
 if has('gui_running')
     set guioptions-=r       " remove right scrollbar
     set guioptions-=L       " remove left scrollbar
@@ -90,7 +91,7 @@ endif
 " Airline
 set laststatus=2    " Always display the statusline in all windows
 set noshowmode      " Don't display mode name (e.g. Insert) below airline
-let g:airline_theme='bubblegum'
+let g:airline_theme='solarized'
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#fnamemod = ':t'
 
@@ -104,8 +105,6 @@ let g:UltiSnipsJumpBackwardTrigger="<c-z>"
 let g:UltiSnipsUsePythonVersion = 3
 
 " CtrlP
-set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*.pyc,results/*
-let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files -co --exclude-standard']
 
 " Buffers
 nmap <C-l> :bnext<CR>
@@ -123,12 +122,6 @@ let g:syntastic_mode_map = { 'mode': 'passive' }
 " SimplyFold
 let g:SimpylFold_fold_import = 0
 
-" Ack
-if executable('ag')
-  let g:ackprg = 'ag --vimgrep'
-endif
-cnoreabbrev ag Ack
-
 " NCM2
 autocmd BufEnter * call ncm2#enable_for_buffer()
 set completeopt=noinsert,menuone,noselect
@@ -136,12 +129,6 @@ set completeopt=noinsert,menuone,noselect
 inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
 inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 
-" Tmuxline
-let g:tmuxline_preset = {
-            \ 'a'    : '#S',
-            \'win'  : '#I #W',
-            \'cwin' : '#I #W',
-            \ 'z'    : '#H',
-            \'options': {
-            \'status-justify': 'left'},
-            \}
+" FZF
+nnoremap <C-p> :Files<Cr>
+nnoremap <C-o> :Rg<Cr>
