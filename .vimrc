@@ -12,6 +12,7 @@ Plug 'editorconfig/editorconfig-vim'
 Plug 'scrooloose/syntastic'
 Plug '~/.fzf'
 Plug 'junegunn/fzf.vim'
+Plug 'tweekmonster/wstrip.vim'
 
 " Aesthetics
 Plug 'vim-airline/vim-airline'
@@ -71,6 +72,9 @@ nnoremap <esc> :noh<return><esc>
 nnoremap <esc>^[ <esc>^[
 " buffer switching
 :nnoremap <C-l> :buffer<Space><tab>
+" No need for shift ; -> :
+:nnoremap ; :
+:vnoremap ; :
 
 " UI
 "let g:seoul256_srgb = 1
@@ -132,3 +136,14 @@ inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
 " FZF
 nnoremap <C-p> :Files<Cr>
 nnoremap <C-o> :Rg<Cr>
+
+" Fugitive Git
+cnoreabbrev gs Gstatus
+cnoreabbrev gd Gdiff
+cnoreabbrev gc Gcommit
+cnoreabbrev gp Gpush
+
+" Wstrip
+let g:wstrip_auto = 1
+let g:wstrip_highlight = 0
+cnoreabbrev Strip %s/\s\+$//e
