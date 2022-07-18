@@ -5,22 +5,31 @@ local opt = vim.opt  -- to set options
 
 
 -------------------- PLUGINS -------------------------------
-cmd 'packadd paq-nvim'               -- load the package manager
-local paq = require('paq-nvim').paq  -- a convenient alias
-paq {'savq/paq-nvim', opt = true}    -- paq-nvim manages itself
+require "paq" {
+    'savq/paq-nvim';
 
-paq {'shougo/deoplete-lsp'}
-paq {'shougo/deoplete.nvim', run = fn['remote#host#UpdateRemotePlugins']}
-g['deoplete#enable_at_startup'] = 1  -- enable deoplete at startup
-paq {'nvim-treesitter/nvim-treesitter'}
-paq {'neovim/nvim-lspconfig'}
+    {'nvim-treesitter/nvim-treesitter', run=vim.fn[':TSUpdate']};
+    {'neovim/nvim-lspconfig'};           -- Collection of configurations for built-in LSP client
+    {'hrsh7th/nvim-cmp'};                -- Autocompletion plugin
+    {'hrsh7th/cmp-nvim-lsp'};            -- LSP source for nvim-cmp
+    {'saadparwaiz1/cmp_luasnip'};        -- Snippets source for nvim-cmp
+    {'L3MON4D3/LuaSnip'};                -- Snippets plugin
 
-paq {'junegunn/fzf', run = fn['fzf#install']}
-paq {'junegunn/fzf.vim'}
-paq {'ojroques/nvim-lspfuzzy'}
+    {'junegunn/fzf', run=vim.fn['fzf#install()']};
+    {'junegunn/fzf.vim'};
+    {'junegunn/goyo.vim'};
+    {'ojroques/nvim-lspfuzzy'};
 
-paq {'junegunn/seoul256.vim'}
-paq {'famiu/feline.nvim'}
+    {'junegunn/seoul256.vim'};
+    {'famiu/feline.nvim'};
+    {'numToStr/Comment.nvim'};
+
+    {'tpope/vim-fugitive'};
+    {'tpope/vim-rhubarb'};
+
+    {'superevilmegaco/AutoRemoteSync.nvim'};
+    {'chipsenkbeil/distant.nvim'};
+}
 
 
 -------------------- OPTIONS -------------------------------
@@ -62,9 +71,12 @@ map('i', '<S-Tab>', 'pumvisible() ? "\\<C-p>" : "\\<Tab>"', {expr = true})
 map('i', '<Tab>', 'pumvisible() ? "\\<C-n>" : "\\<Tab>"', {expr = true})
 
 
+-------------------- COMMENT -------------------------------
+require('Comment').setup()
+
 -------------------- TREE-SITTER ---------------------------
 local ts = require 'nvim-treesitter.configs'
-ts.setup {ensure_installed = 'maintained', highlight = {enable = true}}
+ts.setup {ensure_installed = {'python', 'markdown', 'lua'}, highlight = {enable = true}}
 
 
 -------------------- LSP -----------------------------------
@@ -85,5 +97,13 @@ map('n', '<space>m', '<cmd>lua vim.lsp.buf.rename()<CR>')
 map('n', '<space>r', '<cmd>lua vim.lsp.buf.references()<CR>')
 map('n', '<space>s', '<cmd>lua vim.lsp.buf.document_symbol()<CR>')
 
-
+-------------------- DISTANT --------------------------------
+require('distant').setup {
+    -- applies chip's personal settings to every machine you connect to
+    --
+    -- 1. ensures that distant servers terminate with no connections
+    -- 2. provides navigation bindings for remote directories
+    -- 3. provides keybinding to jump into a remote file's parent directory
+    ['*'] = require('distant.settings').chip_default()
+}
 
