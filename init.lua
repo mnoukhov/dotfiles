@@ -19,10 +19,12 @@ require "paq" {
     {'junegunn/fzf.vim'};
     {'junegunn/goyo.vim'};
     {'ojroques/nvim-lspfuzzy'};
-
-    {'junegunn/seoul256.vim'};
-    {'famiu/feline.nvim'};
     {'numToStr/Comment.nvim'};
+
+    -- style
+    {'junegunn/seoul256.vim'};
+    'nvim-lualine/lualine.nvim';        -- statusline
+    'kyazdani42/nvim-web-devicons';     -- icons for the statusline
 
     {'tpope/vim-fugitive'};
     {'tpope/vim-rhubarb'};
@@ -106,4 +108,19 @@ require('distant').setup {
     -- 3. provides keybinding to jump into a remote file's parent directory
     ['*'] = require('distant.settings').chip_default()
 }
+
+
+-------------------- Lualine --------------------------------
+require('lualine').setup {
+    options = { 
+        theme = 'seoul256',
+        icons_enabled = false,
+    },
+    sections = {
+        lualine_b = {'branch', 'diff', 'diagnostics'},
+        lualine_x = {},
+    }
+}
+
+require 'nvim-web-devicons'.setup()
 
