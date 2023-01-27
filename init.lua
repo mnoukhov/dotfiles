@@ -8,15 +8,18 @@ local opt = vim.opt  -- to set options
 require "paq" {
     'savq/paq-nvim';
 
-    {'nvim-treesitter/nvim-treesitter', run=vim.fn[':TSUpdate']};
+    {'nvim-treesitter/nvim-treesitter', run=function() vim.cmd "TSUpdate" end };
     {'neovim/nvim-lspconfig'};           -- Collection of configurations for built-in LSP client
     {'hrsh7th/nvim-cmp'};                -- Autocompletion plugin
     {'hrsh7th/cmp-nvim-lsp'};            -- LSP source for nvim-cmp
     {'saadparwaiz1/cmp_luasnip'};        -- Snippets source for nvim-cmp
     {'L3MON4D3/LuaSnip'};                -- Snippets plugin
+    {'lervag/vimtex'};
 
-    {'junegunn/fzf', run=vim.fn['fzf#install()']};
+    -- FZF
+    {'junegunn/fzf'};
     {'junegunn/fzf.vim'};
+
     {'junegunn/goyo.vim'};
     {'ojroques/nvim-lspfuzzy'};
     {'numToStr/Comment.nvim'};
@@ -25,6 +28,7 @@ require "paq" {
     {'junegunn/seoul256.vim'};
     'nvim-lualine/lualine.nvim';        -- statusline
     'kyazdani42/nvim-web-devicons';     -- icons for the statusline
+    {'edkolev/tmuxline.vim'};
 
     {'tpope/vim-fugitive'};
     {'tpope/vim-rhubarb'};
@@ -77,8 +81,11 @@ map('i', '<Tab>', 'pumvisible() ? "\\<C-n>" : "\\<Tab>"', {expr = true})
 require('Comment').setup()
 
 -------------------- TREE-SITTER ---------------------------
-local ts = require 'nvim-treesitter.configs'
-ts.setup {ensure_installed = {'python', 'markdown', 'lua'}, highlight = {enable = true}}
+require 'nvim-treesitter.configs'.setup {
+    ensure_installed = {'python', 'markdown', 'lua'}, 
+    highlight = {enable = true},
+    auto_install = true,
+}
 
 
 -------------------- LSP -----------------------------------
@@ -122,5 +129,7 @@ require('lualine').setup {
     }
 }
 
-require 'nvim-web-devicons'.setup()
+-------------------- Tmuxline --------------------------------
+-- vim.g['tmuxline_theme'] = 'vim_statusline_1'
 
+require 'nvim-web-devicons'.setup()
