@@ -8,7 +8,9 @@ local opt = vim.opt  -- to set options
 require "paq" {
     'savq/paq-nvim';
 
-    {'nvim-treesitter/nvim-treesitter', run=function() vim.cmd "TSUpdate" end };
+    {'nvim-treesitter/nvim-treesitter'},
+    {'nvim-treesitter/nvim-treesitter-context'},
+    {'nvim-treesitter/nvim-treesitter-textobjects'},
     {'neovim/nvim-lspconfig'};           -- Collection of configurations for built-in LSP client
     {'hrsh7th/nvim-cmp'};                -- Autocompletion plugin
     {'hrsh7th/cmp-nvim-lsp'};            -- LSP source for nvim-cmp
@@ -29,6 +31,7 @@ require "paq" {
     'nvim-lualine/lualine.nvim';        -- statusline
     'kyazdani42/nvim-web-devicons';     -- icons for the statusline
     {'edkolev/tmuxline.vim'};
+    {'kdheepak/tabline.nvim'};
 
     {'tpope/vim-fugitive'};
     {'tpope/vim-rhubarb'};
@@ -63,6 +66,8 @@ opt.wrap = false                    -- Disable line wrap
 
 
 -------------------- MAPPINGS ------------------------------
+vim.g.mapleader = '\\'
+
 local function map(mode, lhs, rhs, opts)
     local options = {noremap = true}
     if opts then options = vim.tbl_extend('force', options, opts) end
@@ -76,6 +81,10 @@ map('n', '<Esc>', '<cmd>noh<CR>')   -- escape to remove highlight
 map('i', '<S-Tab>', 'pumvisible() ? "\\<C-p>" : "\\<Tab>"', {expr = true})
 map('i', '<Tab>', 'pumvisible() ? "\\<C-n>" : "\\<Tab>"', {expr = true})
 
+-- control h and l to change between tabs
+map('n', '<C-h>', '<cmd>bprevious<CR>')
+map('n', '<C-l>', '<cmd>bnext<CR>')
+
 
 -------------------- COMMENT -------------------------------
 require('Comment').setup()
@@ -87,24 +96,63 @@ require 'nvim-treesitter.configs'.setup {
     auto_install = true,
 }
 
+-- do folds
+opt.foldmethod = "expr"
+opt.foldexpr = "nvim_treesitter#foldexpr()"
 
 -------------------- LSP -----------------------------------
 local lsp = require 'lspconfig'
 local lspfuzzy = require 'lspfuzzy'
 
+local on_attach = function(client, bufnr)
+    vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+
+    -- Mappings.
+    -- See `:help vim.lsp.*` for documentation on any of the below functions
+    local bufopts = { noremap=true, silent=false, buffer=bufnr }
+    vim.keymap.set('n', '<leader>D', vim.lsp.buf.declaration, bufopts)
+    vim.keymap.set('n', '<leader>d', vim.lsp.buf.definition, bufopts)
+    vim.keymap.set('n', '<leader>r', vim.lsp.buf.rename, bufopts)
+    vim.keymap.set('n', '<leader>a', vim.lsp.buf.references, bufopts)
+    vim.keymap.set('n', '<leader>f', function() vim.lsp.buf.format { async = true } end, bufopts)
+    vim.lsp.set_log_level("debug")
+
+    -- vim.cmd [[autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting_sync()]]
+end
+
+
 -- We use the default settings for ccls and pylsp: the option table can stay empty
-lsp.pylsp.setup {}
+lsp.pylsp.setup {
+    on_attach = on_attach,
+    filetypes = {"python"},
+    settings = {
+        pyslp = {
+            plugins = {
+                -- black = { enabled = true },
+                -- isort = { enabled = true, profile = "black" },
+                pycodestyle = {enabled = true},
+                pylsp_black = {enabled = true},
+                pylsp_isort = {enabled = true},
+                -- disabled standard plugins
+                autopep8 = {enabled = false},       -- covered by black
+                yapf = {enabled = false},           -- covered by black
+                pydocstyle = {enabled = false},
+            },
+        },
+    }
+}
 lspfuzzy.setup {}  -- Make the LSP client use FZF instead of the quickfix list
 
-map('n', '<space>,', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>')
-map('n', '<space>;', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>')
-map('n', '<space>a', '<cmd>lua vim.lsp.buf.code_action()<CR>')
-map('n', '<space>d', '<cmd>lua vim.lsp.buf.definition()<CR>')
-map('n', '<space>f', '<cmd>lua vim.lsp.buf.formatting()<CR>')
-map('n', '<space>h', '<cmd>lua vim.lsp.buf.hover()<CR>')
-map('n', '<space>m', '<cmd>lua vim.lsp.buf.rename()<CR>')
-map('n', '<space>r', '<cmd>lua vim.lsp.buf.references()<CR>')
-map('n', '<space>s', '<cmd>lua vim.lsp.buf.document_symbol()<CR>')
+
+-- map('n', '<leader>,', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>')
+-- map('n', '<leader>;', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>')
+-- map('n', '<leader>a', '<cmd>lua vim.lsp.buf.code_action()<CR>')
+-- map('n', '<leader>d', '<cmd>lua vim.lsp.buf.definition()<CR>')
+-- map('n', '<leader>f', '<cmd>lua vim.lsp.buf.format()<CR>')
+-- map('n', '<leader>h', '<cmd>lua vim.lsp.buf.hover()<CR>')
+-- map('n', '<leader>m', '<cmd>lua vim.lsp.buf.rename()<CR>')
+-- map('n', '<leader>r', '<cmd>lua vim.lsp.buf.references()<CR>')
+-- map('n', '<leader>s', '<cmd>lua vim.lsp.buf.document_symbol()<CR>')
 
 -------------------- DISTANT --------------------------------
 require('distant').setup {
@@ -124,7 +172,6 @@ require('lualine').setup {
         icons_enabled = false,
     },
     sections = {
-        lualine_b = {'branch', 'diff', 'diagnostics'},
         lualine_x = {},
     }
 }
@@ -133,3 +180,18 @@ require('lualine').setup {
 -- vim.g['tmuxline_theme'] = 'vim_statusline_1'
 
 require 'nvim-web-devicons'.setup()
+
+-------------------- Tabline --------------------------------
+require 'tabline'.setup {
+    -- defaults configuration options
+    enable = true,
+    options = {
+        -- if lualine is installed tabline will use separators configured in lualine by default.
+        -- these options can be used to override those settings.
+        section_separators = {'', ''},
+        component_separators = {'', ''},
+        max_bufferline_percent = 66, -- set to nil by default, and it uses vim.o.columns * 2/3
+        show_devicons = true, -- this shows devicons in buffer section
+        show_filename_only = true, -- shows base filename only instead of relative path in filename
+    }
+}
