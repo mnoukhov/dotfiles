@@ -32,6 +32,7 @@ require "paq" {
     'kyazdani42/nvim-web-devicons';     -- icons for the statusline
     {'edkolev/tmuxline.vim'};
     {'kdheepak/tabline.nvim'};
+    {"folke/which-key.nvim", run = function() vim.o.timeout = true vim.o.timeoutlen = 300 end };
 
     {'tpope/vim-fugitive'};
     {'tpope/vim-rhubarb'};
@@ -81,9 +82,10 @@ map('n', '<Esc>', '<cmd>noh<CR>')   -- escape to remove highlight
 map('i', '<S-Tab>', 'pumvisible() ? "\\<C-p>" : "\\<Tab>"', {expr = true})
 map('i', '<Tab>', 'pumvisible() ? "\\<C-n>" : "\\<Tab>"', {expr = true})
 
--- control h and l to change between tabs
+-- control h and l to change between buffer tabs
 map('n', '<C-h>', '<cmd>bprevious<CR>')
 map('n', '<C-l>', '<cmd>bnext<CR>')
+map('n', '<C-x>', '<cmd>bdelete<CR>')
 
 
 -------------------- COMMENT -------------------------------
@@ -195,3 +197,8 @@ require 'tabline'.setup {
         show_filename_only = true, -- shows base filename only instead of relative path in filename
     }
 }
+
+
+-------------------- Which-Key --------------------------------
+require 'which-key'.setup()
+
