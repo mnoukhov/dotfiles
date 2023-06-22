@@ -8,6 +8,7 @@ local opt = vim.opt  -- to set options
 require "paq" {
     'savq/paq-nvim';
 
+    -- Langs and LSP
     {'nvim-treesitter/nvim-treesitter'},
     {'nvim-treesitter/nvim-treesitter-context'},
     {'nvim-treesitter/nvim-treesitter-textobjects'},
@@ -17,25 +18,31 @@ require "paq" {
     {'saadparwaiz1/cmp_luasnip'};        -- Snippets source for nvim-cmp
     {'L3MON4D3/LuaSnip'};                -- Snippets plugin
     {'lervag/vimtex'};
+    {'ojroques/nvim-lspfuzzy'};
 
     -- FZF
     {'junegunn/fzf'};
     {'junegunn/fzf.vim'};
 
-    {'junegunn/goyo.vim'};
-    {'ojroques/nvim-lspfuzzy'};
+    -- motions and ux
     {'numToStr/Comment.nvim'};
+    {"folke/which-key.nvim", run = function() vim.o.timeout = true vim.o.timeoutlen = 300 end };
+    {'tpope/vim-fugitive'};
+    {'tpope/vim-rhubarb'};
+    {'ggandor/leap.nvim'};
+
+    -- Neotree
+    {"nvim-neo-tree/neo-tree.nvim", branch = "v2.x"};
+    "nvim-lua/plenary.nvim",
+    "MunifTanjim/nui.nvim",
 
     -- style
+    {'junegunn/goyo.vim'};
     {'junegunn/seoul256.vim'};
     'nvim-lualine/lualine.nvim';        -- statusline
     'kyazdani42/nvim-web-devicons';     -- icons for the statusline
     {'edkolev/tmuxline.vim'};
     {'kdheepak/tabline.nvim'};
-    {"folke/which-key.nvim", run = function() vim.o.timeout = true vim.o.timeoutlen = 300 end };
-
-    {'tpope/vim-fugitive'};
-    {'tpope/vim-rhubarb'};
 
     {'superevilmegaco/AutoRemoteSync.nvim'};
     {'chipsenkbeil/distant.nvim'};
@@ -44,6 +51,7 @@ require "paq" {
 
 -------------------- OPTIONS -------------------------------
 cmd 'colorscheme seoul256'            -- Put your favorite colorscheme here
+g.seoul256_background = 237
 opt.completeopt = {'menuone', 'noinsert', 'noselect'}  -- Completion options (for deoplete)
 opt.expandtab = true                -- Use spaces instead of tabs
 opt.hidden = true                   -- Enable background buffers
@@ -78,15 +86,18 @@ end
 map('i', 'jj', '<Esc>')             -- jj to escape in insert
 map('n', '<Esc>', '<cmd>noh<CR>')   -- escape to remove highlight
 
--- tab to navigate completion menu
+-- -- tab to navigate completion menu
 map('i', '<S-Tab>', 'pumvisible() ? "\\<C-p>" : "\\<Tab>"', {expr = true})
 map('i', '<Tab>', 'pumvisible() ? "\\<C-n>" : "\\<Tab>"', {expr = true})
 
--- control h and l to change between buffer tabs
+
+-- control h and l to change between buffers
 map('n', '<C-h>', '<cmd>bprevious<CR>')
 map('n', '<C-l>', '<cmd>bnext<CR>')
-map('n', '<C-x>', '<cmd>bdelete<CR>')
+map('n', '<C-d>', '<cmd>bdelete<CR>')
 
+-- fzf --
+map('n', '<C-p>', '<cmd>Files<CR>')
 
 -------------------- COMMENT -------------------------------
 require('Comment').setup()
@@ -106,20 +117,44 @@ opt.foldexpr = "nvim_treesitter#foldexpr()"
 local lsp = require 'lspconfig'
 local lspfuzzy = require 'lspfuzzy'
 
+vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, {desc = "Open Float"})
+vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, {desc = "Go to Prev"})
+vim.keymap.set('n', ']d', vim.diagnostic.goto_next, {desc = "Go to Next"})
+vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, {desc = "Open Location List"})
+
 local on_attach = function(client, bufnr)
     vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
 
     -- Mappings.
     -- See `:help vim.lsp.*` for documentation on any of the below functions
     local bufopts = { noremap=true, silent=false, buffer=bufnr }
-    vim.keymap.set('n', '<leader>D', vim.lsp.buf.declaration, bufopts)
-    vim.keymap.set('n', '<leader>d', vim.lsp.buf.definition, bufopts)
-    vim.keymap.set('n', '<leader>r', vim.lsp.buf.rename, bufopts)
-    vim.keymap.set('n', '<leader>a', vim.lsp.buf.references, bufopts)
+    bufopts.desc = "Declaration"
+    vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
+    bufopts.desc = "Definition"
+    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
+    bufopts.desc = "References"
+    vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
+    bufopts.desc = "Rename"
+    vim.keymap.set('n', '<space>r', vim.lsp.buf.rename, bufopts)
+    bufopts.desc = "Add Workspace Folder"
+    vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, bufopts)
+    bufopts.desc = "Remove Workspace Folder"
+    vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, bufopts)
+    bufopts.desc = "List Workspace Folders"
+    vim.keymap.set('n', '<space>wl', function()
+      print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+    end, bufopts)
+    bufopts.desc = "Format"
     vim.keymap.set('n', '<leader>f', function() vim.lsp.buf.format { async = true } end, bufopts)
+    bufopts.desc = "Code Action"
+    vim.keymap.set({'n','v'}, '<space>c', vim.lsp.buf.code_action, bufopts)
+    bufopts.desc = "Hover"
+    vim.keymap.set('n', '<leader>h', vim.lsp.buf.hover, bufopts)
+    bufopts.desc = "Signature Help"
+    vim.keymap.set({'n','i'}, '<C-k>', vim.lsp.buf.signature_help, bufopts)
     vim.lsp.set_log_level("debug")
 
-    -- vim.cmd [[autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting_sync()]]
+    cmd [[autocmd BufWritePre <buffer> lua vim.lsp.buf.format() ]]
 end
 
 
@@ -132,9 +167,10 @@ lsp.pylsp.setup {
             plugins = {
                 -- black = { enabled = true },
                 -- isort = { enabled = true, profile = "black" },
-                pycodestyle = {enabled = true},
+                -- pycodestyle = {enabled = true},
                 pylsp_black = {enabled = true},
                 pylsp_isort = {enabled = true},
+                ruff = {enabled = true},
                 -- disabled standard plugins
                 autopep8 = {enabled = false},       -- covered by black
                 yapf = {enabled = false},           -- covered by black
@@ -192,13 +228,40 @@ require 'tabline'.setup {
         -- these options can be used to override those settings.
         section_separators = {'', ''},
         component_separators = {'', ''},
-        max_bufferline_percent = 66, -- set to nil by default, and it uses vim.o.columns * 2/3
+        -- max_bufferline_percent = 100, -- set to nil by default, and it uses vim.o.columns * 2/3
         show_devicons = true, -- this shows devicons in buffer section
         show_filename_only = true, -- shows base filename only instead of relative path in filename
     }
 }
 
-
 -------------------- Which-Key --------------------------------
-require 'which-key'.setup()
+local wk = require 'which-key'
+wk.setup({
+  triggers_nowait = {
+    -- marks
+    "`",
+    "'",
+    "g`",
+    "g'",
+    -- registers
+    '"',
+    "<c-r>",
+    -- spelling
+    "z=",
+    -- lsp
+    "<leader>",
+  },
+})
 
+wk.register({
+  w = {
+    name = "workspace", -- optional group name
+  },
+}, { prefix = "<space>" })
+
+
+------------------- Neo Tree ------------------------------
+-- cmd([[ let g:neo_tree_remove_legacy_commands = 1 ]])
+-- require 'neo-tree'
+
+require('leap').add_default_mappings()
