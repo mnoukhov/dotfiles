@@ -8,7 +8,7 @@ require "paq" {
     'savq/paq-nvim';
 
     -- Langs and LSP
-    {'nvim-treesitter/nvim-treesitter'},
+    {'nvim-treesitter/nvim-treesitter', build = ":TSUpdate"},
     {'nvim-treesitter/nvim-treesitter-context'},
     {'nvim-treesitter/nvim-treesitter-textobjects'},
     {'neovim/nvim-lspconfig'};           -- Collection of configurations for built-in LSP client
@@ -137,6 +137,7 @@ lspconfig.pylsp.setup {
                 ruff = {enabled = true},
                 -- disabled standard plugins
                 autopep8 = {enabled = false},       -- covered by black
+                pyflakes = {enabled = false},       -- covered by black
                 yapf = {enabled = false},           -- covered by black
                 pydocstyle = {enabled = false},
             },
@@ -187,7 +188,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
         vim.keymap.set({'n','i'}, '<C-k>', vim.lsp.buf.signature_help, bufopts)
         vim.lsp.set_log_level("debug")
 
-        cmd [[autocmd BufWritePre <buffer> lua vim.lsp.buf.format() ]]
+        vim.cmd [[autocmd BufWritePre <buffer> lua vim.lsp.buf.format() ]]
     end,
 })
     -- local augroup_id = vim.api.nvim_create_augroup(
