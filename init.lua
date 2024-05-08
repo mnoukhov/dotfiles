@@ -2,72 +2,94 @@ local fn = vim.fn    -- to call Vim functions e.g. fn.bufnr()
 local g = vim.g      -- a table to access global variables
 local opt = vim.opt  -- to set options
 
+vim.g.mapleader = '\\'
+
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable", -- latest stable release
+    lazypath,
+  })
+end
+vim.opt.rtp:prepend(lazypath)
 
 -------------------- PLUGINS -------------------------------
-require "paq" {
-    'savq/paq-nvim';
-
-    -- Langs and LSP
-    {'nvim-treesitter/nvim-treesitter', build = ":TSUpdate"},
-    {'nvim-treesitter/nvim-treesitter-context'},
-    {'nvim-treesitter/nvim-treesitter-textobjects'},
-    {'neovim/nvim-lspconfig'};           -- Collection of configurations for built-in LSP client
-    {'hrsh7th/nvim-cmp'};                -- Autocompletion plugin
-    {'hrsh7th/cmp-nvim-lsp'};            -- LSP source for nvim-cmp
-    {'saadparwaiz1/cmp_luasnip'};        -- Snippets source for nvim-cmp
-    {'L3MON4D3/LuaSnip'};                -- Snippets plugin
-    {'lervag/vimtex'};
-    {'joechrisellis/lsp-format-modifications.nvim'};
-
-    -- FZF
-    {'junegunn/fzf'};
-    {'junegunn/fzf.vim'};
-    -- {'ojroques/nvim-lspfuzzy'};
-
-    -- motions and ux
-    {'numToStr/Comment.nvim'};
-    {"folke/which-key.nvim", build = function() vim.o.timeout = true vim.o.timeoutlen = 300 end };
-    {'tpope/vim-fugitive'};
-    {'tpope/vim-rhubarb'};
-    {'tpope/vim-eunuch'};
-    {'ggandor/leap.nvim'};
-
-    -- Neotree
-    {"nvim-neo-tree/neo-tree.nvim", branch = "v3.x"};
+require("lazy").setup({
+    -- Utils
     "nvim-lua/plenary.nvim",
     "MunifTanjim/nui.nvim",
 
+    -- LSP
+    {'VonHeikemen/lsp-zero.nvim', branch = 'v3.x'},
+    {'neovim/nvim-lspconfig'},           -- Collection of configurations for built-in LSP client
+    {'hrsh7th/nvim-cmp'},                -- Autocompletion plugin
+    {'hrsh7th/cmp-nvim-lsp'},            -- LSP source for nvim-cmp
+    {'hrsh7th/cmp-buffer'},
+    -- {'saadparwaiz1/cmp_luasnip'},        -- Snippets source for nvim-cmp
+    {'L3MON4D3/LuaSnip', version = "v2.*"},                -- Snippets plugin
+    {'lervag/vimtex'},
+    {'joechrisellis/lsp-format-modifications.nvim'},
+    {'williamboman/mason.nvim'};
+    {'williamboman/mason-lspconfig.nvim'};
+
+    -- Treesitter
+    {'nvim-treesitter/nvim-treesitter', build = ":TSUpdate"},
+    {'nvim-treesitter/nvim-treesitter-context'},
+    {'nvim-treesitter/nvim-treesitter-textobjects'},
+
+    -- Telescope
+    {
+        'nvim-telescope/telescope.nvim', 
+	version = '0.1.x', 
+        dependencies = { 'nvim-lua/plenary.nvim' }
+    },
+
+    -- motions and ux
+    {'numToStr/Comment.nvim'},
+    {"folke/which-key.nvim", build = function() vim.o.timeout = true vim.o.timeoutlen = 300 end },
+    {'tpope/vim-fugitive'},
+    {'tpope/vim-rhubarb'},
+    {'tpope/vim-eunuch'},
+    {'ggandor/leap.nvim'},
+
+    -- Neotree
+    {"nvim-neo-tree/neo-tree.nvim", branch = "v3.x"},
+
     -- style
-    {'junegunn/goyo.vim'};
-    {'junegunn/seoul256.vim'};
-    'nvim-lualine/lualine.nvim';        -- statusline
-    'kyazdani42/nvim-web-devicons';     -- icons for the statusline
-    {'edkolev/tmuxline.vim'};
-    {'kdheepak/tabline.nvim'};
+    {'junegunn/goyo.vim'},
+    {'junegunn/seoul256.vim'},
+    -- {'shaunsingh/seoul256.nvim'},
+
+    'nvim-lualine/lualine.nvim',        -- statusline
+    'kyazdani42/nvim-web-devicons',     -- icons for the statusline
+    {'edkolev/tmuxline.vim'},
+    {'kdheepak/tabline.nvim'},
     --
-    {'superevilmegaco/AutoRemoteSync.nvim'};
+    {'superevilmegaco/AutoRemoteSync.nvim'},
     -- {'chipsenkbeil/distant.nvim'};
-}
+})
 
 
 -------------------- OPTIONS -------------------------------
 -- colors
-opt.termguicolors = true
-vim.cmd 'colorscheme seoul256'            -- Put your favorite colorscheme here
 g.seoul256_background = 237
+g.seoul256_srgb = 1
+vim.cmd 'colorscheme seoul256'            -- Put your favorite colorscheme here
 
-opt.completeopt = {'menuone', 'noinsert', 'noselect'}  -- Completion options (for deoplete)
 opt.expandtab = true                -- Use spaces instead of tabs
 opt.hidden = true                   -- Enable background buffers
 opt.ignorecase = true               -- Ignore case
 opt.joinspaces = false              -- No double spaces with join
 opt.list = true                     -- Show some invisible characters
 opt.number = true                   -- Show line numbers
--- opt.relativenumber = true           -- Relative line numbers
 opt.scrolloff = 4                   -- Lines of context
 opt.shiftround = true               -- Round indent
 opt.shiftwidth = 4                  -- Size of an indent
-opt.sidescrolloff = 8               -- Columns of context
+-- opt.sidescrolloff = 8               -- Columns of context
 opt.smartcase = true                -- Do not ignore case with capitals
 opt.smartindent = true              -- Insert indents automatically
 opt.splitbelow = true               -- Put new windows below current
@@ -79,7 +101,6 @@ opt.wrap = false                    -- Disable line wrap
 
 
 -------------------- MAPPINGS ------------------------------
-vim.g.mapleader = '\\'
 
 local function map(mode, lhs, rhs, opts)
     local options = {noremap = true}
@@ -90,9 +111,9 @@ end
 map('i', 'jj', '<Esc>')             -- jj to escape in insert
 map('n', '<Esc>', '<cmd>noh<CR>')   -- escape to remove highlight
 
--- -- tab to navigate completion menu
-map('i', '<S-Tab>', 'pumvisible() ? "\\<C-p>" : "\\<Tab>"', {expr = true})
-map('i', '<Tab>', 'pumvisible() ? "\\<C-n>" : "\\<Tab>"', {expr = true})
+-- -- -- tab to navigate completion menu
+-- map('i', '<S-Tab>', 'pumvisible() ? "\\<C-p>" : "\\<Tab>"', {expr = true})
+-- map('i', '<Tab>', 'pumvisible() ? "\\<C-n>" : "\\<Tab>"', {expr = true})
 
 
 -- control h and l to change between buffers
@@ -100,12 +121,11 @@ map('n', '<C-h>', '<cmd>bprevious<CR>')
 map('n', '<C-l>', '<cmd>bnext<CR>')
 map('n', '<C-d>', '<cmd>bdelete<CR>')
 
--- fzf --
-map('n', '<C-p>', '<cmd>Files<CR>')
-
 -- fugitive --
-map('n', '<space>g', '<cmd>Git<CR>', {desc = "Git"})
+map('n', '<leader>g', '<cmd>Git<CR>', {desc = "Git"})
 
+-- show current path --
+map('n', '<leader>p', '<cmd>echo expand("%:p")<CR>', {desc = "Show current path"})
 -------------------- COMMENT -------------------------------
 require('Comment').setup()
 
@@ -120,118 +140,112 @@ require 'nvim-treesitter.configs'.setup {
 opt.foldmethod = "expr"
 opt.foldexpr = "nvim_treesitter#foldexpr()"
 
--------------------- LSP -----------------------------------
-local lspconfig = require 'lspconfig'
+require('treesitter-context').setup({
+    multiline_threshold = 5,
+})
 
-lspconfig.pylsp.setup {
-    -- on_attach = on_attach,
-    filetypes = {"python"},
+--
+-------------------- CMP  -----------------------------------
+local cmp = require('cmp')
+local cmp_action = require('lsp-zero').cmp_action()
+
+cmp.setup({
+  mapping = cmp.mapping.preset.insert({
+    ['<C-Space>'] = cmp.mapping.complete(),
+    ['<Tab>'] = cmp_action.luasnip_supertab(),
+    ['<S-Tab>'] = cmp_action.luasnip_shift_supertab(),
+  })
+})
+
+
+-------------------- LSP -----------------------------------
+--debug
+vim.lsp.set_log_level("debug")
+--
+local lsp_zero = require('lsp-zero')
+-- lsp_zero.extend_lspconfig()
+
+lsp_zero.on_attach(function(client, bufnr)
+    -- See :help lsp-zero-keybindings
+    lsp_zero.default_keymaps({buffer = bufnr, preserve_mappings = False})
+    vim.keymap.set('n', 'gr', '<cmd>Telescope lsp_references<cr>', {buffer = bufnr, desc = "Go to References"})
+    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, {buffer = bufnr, desc = "Go to Definition"})
+    vim.keymap.set('n', 'gq', vim.diagnostic.setloclist, {buffer = bufnr, desc = "Open Location List"})
+    vim.keymap.set('n', 'gl', vim.diagnostic.open_float, {buffer = bufnr, desc = "Open Diagnostics Float"})
+    -- Toggle LocList
+    -- vim.keymap.set("n", "gq", function()
+    --     vim.diagnostic.setloclist({ open = false }) -- don't open and focus
+    --     local window = vim.api.nvim_get_current_win()
+    --     vim.cmd.lwindow() -- open+focus loclist if has entries, else close -- this is the magic toggle command
+    --     vim.api.nvim_set_current_win(window) -- restore focus to window you were editing (delete this if you want to stay in loclist)
+    -- end, { buffer = bufnr , desc = "Open Diagnostics List"})
+
+
+    lsp_zero.buffer_autoformat()
+    vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+        pattern = { "*.py" },
+        callback = function()
+            vim.lsp.buf.code_action {
+            context = {
+                only = { 'source.organizeImports.ruff' },
+            },
+            apply = true,
+            }
+            vim.wait(100)
+        end,
+    })
+end)
+
+local lspconfig = require('lspconfig')
+lspconfig.autotools_ls.setup{}
+lspconfig.ruff_lsp.setup {}
+lspconfig.pylsp.setup({
     settings = {
         pyslp = {
             plugins = {
-                -- black = { enabled = true },
-                -- isort = { enabled = true, profile = "black" },
-                -- pycodestyle = {enabled = true},
-                pylsp_black = {enabled = true},
-                pylsp_isort = {enabled = true},
-                ruff = {enabled = true},
-                -- disabled standard plugins
+                pylsp_black = {enabled = false},
+                pylsp_isort = {enabled = false},
+                pycodestyle = {enabled = false},
                 autopep8 = {enabled = false},       -- covered by black
                 pyflakes = {enabled = false},       -- covered by black
                 yapf = {enabled = false},           -- covered by black
                 pydocstyle = {enabled = false},
             },
         },
-    }
-}
-
-vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, {desc = "Open Float"})
-vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, {desc = "Go to Prev"})
-vim.keymap.set('n', ']d', vim.diagnostic.goto_next, {desc = "Go to Next"})
-vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, {desc = "Open Location List"})
-
--- local on_attach = function(client, bufnr)
-vim.api.nvim_create_autocmd('LspAttach', {
-    group = vim.api.nvim_create_augroup('UserLspConfig', {}),
-    callback = function(ev)
-        -- vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
-        -- Enable completion triggered by <c-x><c-o>
-        vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
-
-        -- Buffer local mappings.
-        -- See `:help vim.lsp.*` for documentation on any of the below functions
-    -- local bufopts = { noremap=true, silent=false, buffer=bufnr }
-        local bufopts = { buffer = ev.buf }
-        bufopts.desc = "Declaration"
-        vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
-        bufopts.desc = "Definition"
-        vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
-        bufopts.desc = "References"
-        vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
-        bufopts.desc = "Rename"
-        vim.keymap.set('n', '<space>r', vim.lsp.buf.rename, bufopts)
-        bufopts.desc = "Add Workspace Folder"
-        vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, bufopts)
-        bufopts.desc = "Remove Workspace Folder"
-        vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, bufopts)
-        bufopts.desc = "List Workspace Folders"
-        vim.keymap.set('n', '<space>wl', function()
-            print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-        end, bufopts)
-        bufopts.desc = "Format"
-        vim.keymap.set('n', '<leader>f', function() vim.lsp.buf.format { async = true } end, bufopts)
-        bufopts.desc = "Code Action"
-        vim.keymap.set({'n','v'}, '<space>c', vim.lsp.buf.code_action, bufopts)
-        bufopts.desc = "Hover"
-        vim.keymap.set('n', '<leader>h', vim.lsp.buf.hover, bufopts)
-        bufopts.desc = "Signature Help"
-        vim.keymap.set({'n','i'}, '<C-k>', vim.lsp.buf.signature_help, bufopts)
-        vim.lsp.set_log_level("debug")
-
-        vim.cmd [[autocmd BufWritePre <buffer> lua vim.lsp.buf.format() ]]
-    end,
+    },
 })
-    -- local augroup_id = vim.api.nvim_create_augroup(
-    --     "FormatModificationsDocumentFormattingGroup",
-    --     { clear = false }
-    -- )
-    -- vim.api.nvim_clear_autocmds({ group = augroup_id, buffer = bufnr })
-    -- vim.api.nvim_create_autocmd(
-    --     { "BufWritePre" },
-    --     {
-    --         group = augroup_id,
-    --         buffer = bufnr,
-    --         callback = function()
-    --             local lsp_format_modifications = require"lsp-format-modifications"
-    --             lsp_format_modifications.format_modifications(client, bufnr)
-    --         end,
-    --     }
-    -- )
+-- require('mason').setup({})
+-- require('mason-lspconfig').setup({
+--   -- Replace the language servers listed here 
+--   -- with the ones you want to install
+--   ensure_installed = {'pylsp', 'autotools_ls'},
+--   handlers = {
+--     lsp_zero.default_setup,
+--     pylsp = function()
+--       require('lspconfig').pylsp.setup({
+--           settings = {
+--               pyslp = {
+--                   plugins = {
+--                       pylsp_black = {enabled = true},
+--                       pylsp_isort = {enabled = true},
+--                       ruff = {enabled = true},
+--                       pycodestyle = {enabled = false},
+--                       autopep8 = {enabled = false},       -- covered by black
+--                       pyflakes = {enabled = false},       -- covered by black
+--                       yapf = {enabled = false},           -- covered by black
+--                       pydocstyle = {enabled = false},
+--                       jedi = {environment = "/home/toolkit/.conda/envs/trl/"},
+--                   },
+--               },
+--           },
+--       })
+--     end,
+--   },
+-- })
 
 
--- We use the default settings for ccls and pylsp: the option table can stay empty
--- require('lspfuzzy').setup {}  -- Make the LSP client use FZF instead of the quickfix list
-
-
--- map('n', '<leader>,', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>')
--- map('n', '<leader>;', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>')
--- map('n', '<leader>a', '<cmd>lua vim.lsp.buf.code_action()<CR>')
--- map('n', '<leader>d', '<cmd>lua vim.lsp.buf.definition()<CR>')
--- map('n', '<leader>f', '<cmd>lua vim.lsp.buf.format()<CR>')
--- map('n', '<leader>h', '<cmd>lua vim.lsp.buf.hover()<CR>')
--- map('n', '<leader>m', '<cmd>lua vim.lsp.buf.rename()<CR>')
--- map('n', '<leader>r', '<cmd>lua vim.lsp.buf.references()<CR>')
--- map('n', '<leader>s', '<cmd>lua vim.lsp.buf.document_symbol()<CR>')
-
--------------------- DISTANT --------------------------------
--- require('distant').setup {
---     -- applies chip's personal settings to every machine you connect to
---     --
---     -- 1. ensures that distant servers terminate with no connections
---     -- 2. provides navigation bindings for remote directories
---     -- 3. provides keybinding to jump into a remote file's parent directory
---     ['*'] = require('distant.settings').chip_default()
--- }
+-- vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, {desc = "Open Float"})
+-- vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, {desc = "Open Location List"})
 
 
 -------------------- Lualine --------------------------------
@@ -299,35 +313,28 @@ map('n', '<leader>nf', '<cmd>Neotree position=float<CR>', {desc = "Neotree Float
 
 require('leap').add_default_mappings()
 
-------------------- CMP ------------------------------
--- require 'cmp'.setup({
---     snippet = {
---       -- REQUIRED - you must specify a snippet engine
---       expand = function(args)
---         vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
---         require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
---         -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
---         -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
---       end,
---     },
---     window = {
---       -- completion = cmp.config.window.bordered(),
---       -- documentation = cmp.config.window.bordered(),
---     },
---     mapping = cmp.mapping.preset.insert({
---       ['<C-b>'] = cmp.mapping.scroll_docs(-4),
---       ['<C-f>'] = cmp.mapping.scroll_docs(4),
---       ['<C-Space>'] = cmp.mapping.complete(),
---       ['<C-e>'] = cmp.mapping.abort(),
---       ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
---     }),
---     sources = cmp.config.sources({
---       { name = 'nvim_lsp' },
---       -- { name = 'vsnip' }, -- For vsnip users.
---       { name = 'luasnip' }, -- For luasnip users.
---       -- { name = 'ultisnips' }, -- For ultisnips users.
---       -- { name = 'snippy' }, -- For snippy users.
---     }, {
---         { name = 'buffer' },
---     })
+local builtin = require('telescope.builtin')
+vim.keymap.set('n', '<leader>ff', builtin.find_files, {desc="Find Files"})
+vim.keymap.set('n', '<leader>fg', builtin.live_grep, {desc="Live Grep"})
+vim.keymap.set('n', '<leader>fb', builtin.buffers, {desc="Find Buffers"})
+vim.keymap.set('n', '<leader>fh', builtin.help_tags, {desc="Find Help Tags"})
+vim.keymap.set('n', '<leader>fs', builtin.grep_string, {desc="Grep String under Cursor"})
+vim.keymap.set('n', '<leader>f;', builtin.jumplist, {desc="Find Jumplist"})
+vim.keymap.set('n', '<leader>f/', builtin.current_buffer_fuzzy_find, {desc="Current Buffer Fuzzy Find"})
+
+
+-- require("telescope").setup({
+--     pickers = {
+--         find_files = {
+--             find_command = {
+--                 'fd',
+--                 '--type',
+--                 'f',
+--                 '--no-ignore-vcs',
+--                 '--color=never',
+--                 '--hidden',
+--                 '--follow',
+--             }
+--         }
+--     }
 -- })
