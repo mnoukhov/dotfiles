@@ -47,6 +47,10 @@ require("lazy").setup({
 	version = '0.1.x', 
         dependencies = { 'nvim-lua/plenary.nvim' }
     },
+    -- -- FZF
+    -- {'junegunn/fzf'},
+    -- {'junegunn/fzf.vim'},
+    -- {'ojroques/nvim-lspfuzzy'},
 
     -- motions and ux
     {'numToStr/Comment.nvim'},
@@ -71,10 +75,43 @@ require("lazy").setup({
     --
     {'superevilmegaco/AutoRemoteSync.nvim'},
     -- {'chipsenkbeil/distant.nvim'};
+    {
+        "folke/trouble.nvim",
+        opts = {}, -- for default options, refer to the configuration section for custom setup.
+        cmd = "Trouble",
+        keys = {
+            {
+                "<leader>x",
+                "<cmd>Trouble diagnostics toggle filter.buf=0 focus=true<cr>",
+                desc = "Buffer Diagnostics (Trouble)",
+            },
+            {
+                "<leader>cs",
+                "<cmd>Trouble symbols toggle focus=false win.position=left<cr>",
+                desc = "Symbols (Trouble)",
+            },
+            {
+                "<leader>cl",
+                "<cmd>Trouble lsp toggle focus=false win.position=left<cr>",
+                desc = "LSP Definitions / references / ... (Trouble)",
+            },
+            {
+                "<leader>l",
+                "<cmd>Trouble loclist toggle<cr>",
+                desc = "Location List (Trouble)",
+            },
+            {
+                "<leader>q",
+                "<cmd>Trouble qflist toggle<cr>",
+                desc = "Quickfix List (Trouble)",
+            },
+        },
+    }
 })
 
 
 -------------------- OPTIONS -------------------------------
+g.python3_host_prog = '/home/toolkit/.conda/envs/default/bin/python'
 -- colors
 g.seoul256_background = 237
 g.seoul256_srgb = 1
@@ -121,6 +158,9 @@ map('n', '<C-h>', '<cmd>bprevious<CR>')
 map('n', '<C-l>', '<cmd>bnext<CR>')
 map('n', '<C-d>', '<cmd>bdelete<CR>')
 
+-- -- fzf --
+-- map('n', '<C-p>', '<cmd>Files<CR>')
+
 -- fugitive --
 map('n', '<leader>g', '<cmd>Git<CR>', {desc = "Git"})
 
@@ -160,7 +200,7 @@ cmp.setup({
 
 -------------------- LSP -----------------------------------
 --debug
-vim.lsp.set_log_level("debug")
+-- vim.lsp.set_log_level("debug")
 --
 local lsp_zero = require('lsp-zero')
 -- lsp_zero.extend_lspconfig()
@@ -170,8 +210,8 @@ lsp_zero.on_attach(function(client, bufnr)
     lsp_zero.default_keymaps({buffer = bufnr, preserve_mappings = False})
     vim.keymap.set('n', 'gr', '<cmd>Telescope lsp_references<cr>', {buffer = bufnr, desc = "Go to References"})
     vim.keymap.set('n', 'gd', vim.lsp.buf.definition, {buffer = bufnr, desc = "Go to Definition"})
-    vim.keymap.set('n', 'gq', vim.diagnostic.setloclist, {buffer = bufnr, desc = "Open Location List"})
-    vim.keymap.set('n', 'gl', vim.diagnostic.open_float, {buffer = bufnr, desc = "Open Diagnostics Float"})
+    -- vim.keymap.set('n', 'gq', vim.diagnostic.setloclist, {buffer = bufnr, desc = "Open Location List"})
+    -- vim.keymap.set('n', 'gl', vim.diagnostic.open_float, {buffer = bufnr, desc = "Open Diagnostics Float"})
     -- Toggle LocList
     -- vim.keymap.set("n", "gq", function()
     --     vim.diagnostic.setloclist({ open = false }) -- don't open and focus
@@ -191,59 +231,93 @@ lsp_zero.on_attach(function(client, bufnr)
             },
             apply = true,
             }
-            vim.wait(100)
         end,
     })
+
+    -- vim.cmd [[autocmd BufWritePre <buffer> lua vim.lsp.buf.format() ]]
+    -- vim.api.nvim_create_autocmd(
+    --     { "BufWritePre" },
+    --     {
+    --         -- group = augroup_id,
+    --         buffer = bufnr,
+    --         callback = function()
+    --             require("lsp-format-modifications").format_modifications(client, bufnr)
+    --         end,
+    --     }
+    -- )
 end)
 
-local lspconfig = require('lspconfig')
-lspconfig.autotools_ls.setup{}
-lspconfig.ruff_lsp.setup {}
-lspconfig.pylsp.setup({
-    settings = {
-        pyslp = {
-            plugins = {
-                pylsp_black = {enabled = false},
-                pylsp_isort = {enabled = false},
-                pycodestyle = {enabled = false},
-                autopep8 = {enabled = false},       -- covered by black
-                pyflakes = {enabled = false},       -- covered by black
-                yapf = {enabled = false},           -- covered by black
-                pydocstyle = {enabled = false},
-            },
-        },
-    },
-})
 -- require('mason').setup({})
 -- require('mason-lspconfig').setup({
 --   -- Replace the language servers listed here 
 --   -- with the ones you want to install
---   ensure_installed = {'pylsp', 'autotools_ls'},
+--   ensure_installed = {'ruff_lsp', 'pyright', 'autotools_ls'},
 --   handlers = {
 --     lsp_zero.default_setup,
---     pylsp = function()
---       require('lspconfig').pylsp.setup({
---           settings = {
---               pyslp = {
---                   plugins = {
---                       pylsp_black = {enabled = true},
---                       pylsp_isort = {enabled = true},
---                       ruff = {enabled = true},
---                       pycodestyle = {enabled = false},
---                       autopep8 = {enabled = false},       -- covered by black
---                       pyflakes = {enabled = false},       -- covered by black
---                       yapf = {enabled = false},           -- covered by black
---                       pydocstyle = {enabled = false},
---                       jedi = {environment = "/home/toolkit/.conda/envs/trl/"},
---                   },
---               },
---           },
---       })
+--     pyright = function()
+--         require('lspconfig').pyright.setup({
+--             settings = {
+--                 pyright = {
+--                     -- Using Ruff's import organizer
+--                     disableOrganizeImports = true,
+--                 },
+--                 python = {
+--                     analysis = {
+--                         -- Ignore all files for analysis to exclusively use Ruff for linting
+--                         ignore = { '*' },
+--                     },
+--                 },
+--             },
+--         })
 --     end,
+--
+--     ruff_lsp = function()
+--       require('lspconfig').ruff_lsp.setup({
+--         init_options = {
+--             settings = {
+--                 format = {
+--                     args = {  "--config", vim.loop.cwd() .. '/pyproject.toml' }
+--                 },
+--                 lint = {
+--                     args = { "--config", vim.loop.cwd() .. '/pyproject.toml' }
+--                 }
+--             }
+--         }
+--     })
+--     end,
+--
 --   },
 -- })
 
-
+local lspconfig = require('lspconfig')
+lspconfig.pyright.setup {
+  settings = {
+    pyright = {
+      -- Using Ruff's import organizer
+      disableOrganizeImports = true,
+    },
+    python = {
+      analysis = {
+        -- Ignore all files for analysis to exclusively use Ruff for linting
+        ignore = { '*' },
+      },
+    },
+  },
+}
+lspconfig.autotools_ls.setup{}
+local ruff_config_path = vim.loop.cwd() .. '/pyproject.toml'
+lspconfig.ruff_lsp.setup({
+    init_options = {
+        settings = {
+            format = {
+                args = { "--config", ruff_config_path }
+            },
+            lint = {
+                args = { "--config", ruff_config_path }
+            }
+        }
+    }
+})
 -- vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, {desc = "Open Float"})
 -- vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, {desc = "Open Location List"})
 
@@ -322,7 +396,6 @@ vim.keymap.set('n', '<leader>fs', builtin.grep_string, {desc="Grep String under 
 vim.keymap.set('n', '<leader>f;', builtin.jumplist, {desc="Find Jumplist"})
 vim.keymap.set('n', '<leader>f/', builtin.current_buffer_fuzzy_find, {desc="Current Buffer Fuzzy Find"})
 
-
 -- require("telescope").setup({
 --     pickers = {
 --         find_files = {
@@ -338,3 +411,15 @@ vim.keymap.set('n', '<leader>f/', builtin.current_buffer_fuzzy_find, {desc="Curr
 --         }
 --     }
 -- })
+
+---- Trouble ---
+require("trouble").setup(
+{
+  modes = {
+    diagnostics_buffer = {
+      mode = "diagnostics", -- inherit from diagnostics mode
+      filter = { buf = 0 }, -- filter diagnostics to the current buffer
+    },
+  }
+}
+)
