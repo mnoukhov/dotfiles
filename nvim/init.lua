@@ -54,7 +54,19 @@ require("lazy").setup({
 
     -- motions and ux
     {'numToStr/Comment.nvim'},
-    {"folke/which-key.nvim", build = function() vim.o.timeout = true vim.o.timeoutlen = 300 end },
+    {
+        "folke/which-key.nvim", 
+        event = "VeryLazy", 
+        keys = {
+            {
+                "<leader>?",
+                function()
+                    require("which-key").show({ global = false })
+                end,
+                desc = "Buffer Local Keymaps (which-key)",
+            },
+        },
+    },
     {'tpope/vim-fugitive'},
     {'tpope/vim-rhubarb'},
     {'tpope/vim-eunuch'},
@@ -247,48 +259,6 @@ lsp_zero.on_attach(function(client, bufnr)
     -- )
 end)
 
--- require('mason').setup({})
--- require('mason-lspconfig').setup({
---   -- Replace the language servers listed here 
---   -- with the ones you want to install
---   ensure_installed = {'ruff_lsp', 'pyright', 'autotools_ls'},
---   handlers = {
---     lsp_zero.default_setup,
---     pyright = function()
---         require('lspconfig').pyright.setup({
---             settings = {
---                 pyright = {
---                     -- Using Ruff's import organizer
---                     disableOrganizeImports = true,
---                 },
---                 python = {
---                     analysis = {
---                         -- Ignore all files for analysis to exclusively use Ruff for linting
---                         ignore = { '*' },
---                     },
---                 },
---             },
---         })
---     end,
---
---     ruff_lsp = function()
---       require('lspconfig').ruff_lsp.setup({
---         init_options = {
---             settings = {
---                 format = {
---                     args = {  "--config", vim.loop.cwd() .. '/pyproject.toml' }
---                 },
---                 lint = {
---                     args = { "--config", vim.loop.cwd() .. '/pyproject.toml' }
---                 }
---             }
---         }
---     })
---     end,
---
---   },
--- })
-
 local lspconfig = require('lspconfig')
 lspconfig.pyright.setup {
   settings = {
@@ -306,7 +276,7 @@ lspconfig.pyright.setup {
 }
 lspconfig.autotools_ls.setup{}
 local ruff_config_path = vim.loop.cwd() .. '/pyproject.toml'
-lspconfig.ruff_lsp.setup({
+lspconfig.ruff.setup({
     init_options = {
         settings = {
             format = {
@@ -355,28 +325,9 @@ require 'tabline'.setup {
 
 -------------------- Which-Key --------------------------------
 local wk = require 'which-key'
-wk.setup({
-  triggers_nowait = {
-    -- marks
-    "`",
-    "'",
-    "g`",
-    "g'",
-    -- registers
-    '"',
-    "<c-r>",
-    -- spelling
-    "z=",
-    -- lsp
-    "<leader>",
-  },
+wk.add({
+    {"<space>", group="workspace"},
 })
-
-wk.register({
-  w = {
-    name = "workspace", -- optional group name
-  },
-}, { prefix = "<space>" })
 
 
 ------------------- Neo Tree ------------------------------
