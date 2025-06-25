@@ -23,18 +23,8 @@ require("lazy").setup({
     "nvim-lua/plenary.nvim",
     "MunifTanjim/nui.nvim",
 
-    -- LSP
-    {'VonHeikemen/lsp-zero.nvim', branch = 'v3.x'},
-    {'neovim/nvim-lspconfig'},           -- Collection of configurations for built-in LSP client
-    {'hrsh7th/nvim-cmp'},                -- Autocompletion plugin
-    {'hrsh7th/cmp-nvim-lsp'},            -- LSP source for nvim-cmp
-    {'hrsh7th/cmp-buffer'},
-    -- {'saadparwaiz1/cmp_luasnip'},        -- Snippets source for nvim-cmp
     {'L3MON4D3/LuaSnip', version = "v2.*"},                -- Snippets plugin
     {'lervag/vimtex'},
-    {'joechrisellis/lsp-format-modifications.nvim'},
-    {'williamboman/mason.nvim'};
-    {'williamboman/mason-lspconfig.nvim'};
 
     -- Treesitter
     {'nvim-treesitter/nvim-treesitter', build = ":TSUpdate"},
@@ -44,13 +34,9 @@ require("lazy").setup({
     -- Telescope
     {
         'nvim-telescope/telescope.nvim', 
-	version = '0.1.x', 
+        version = '0.1.x', 
         dependencies = { 'nvim-lua/plenary.nvim' }
     },
-    -- -- FZF
-    -- {'junegunn/fzf'},
-    -- {'junegunn/fzf.vim'},
-    -- {'ojroques/nvim-lspfuzzy'},
 
     -- motions and ux
     {'numToStr/Comment.nvim'},
@@ -85,8 +71,10 @@ require("lazy").setup({
     {'edkolev/tmuxline.vim'},
     {'kdheepak/tabline.nvim'},
     --
-    {'superevilmegaco/AutoRemoteSync.nvim'},
-    -- {'chipsenkbeil/distant.nvim'};
+
+    -- Functionality
+    {'neovim/nvim-lspconfig'},           -- Collection of configurations for built-in LSP client
+    {"stevearc/conform.nvim", opts = {}},
     {
         "folke/trouble.nvim",
         opts = {}, -- for default options, refer to the configuration section for custom setup.
@@ -123,7 +111,6 @@ require("lazy").setup({
 
 
 -------------------- OPTIONS -------------------------------
-g.python3_host_prog = '/home/toolkit/.conda/envs/default/bin/python'
 -- colors
 g.seoul256_background = 237
 g.seoul256_srgb = 1
@@ -158,6 +145,7 @@ local function map(mode, lhs, rhs, opts)
 end
 
 map('i', 'jj', '<Esc>')             -- jj to escape in insert
+map('n', ';;', '<cmd>:w<CR>')             -- ;; to save
 map('n', '<Esc>', '<cmd>noh<CR>')   -- escape to remove highlight
 
 -- -- -- tab to navigate completion menu
@@ -170,11 +158,8 @@ map('n', '<C-h>', '<cmd>bprevious<CR>')
 map('n', '<C-l>', '<cmd>bnext<CR>')
 map('n', '<C-d>', '<cmd>bdelete<CR>')
 
--- -- fzf --
--- map('n', '<C-p>', '<cmd>Files<CR>')
-
 -- fugitive --
-map('n', '<leader>g', '<cmd>Git<CR>', {desc = "Git"})
+map('n', '<leader>g', '<cmd>Git ++curwin<CR>', {desc = "Git"})
 
 -- show current path --
 map('n', '<leader>p', '<cmd>echo expand("%:p")<CR>', {desc = "Show current path"})
@@ -198,69 +183,73 @@ require('treesitter-context').setup({
 
 --
 -------------------- CMP  -----------------------------------
-local cmp = require('cmp')
-local cmp_action = require('lsp-zero').cmp_action()
-
-cmp.setup({
-  mapping = cmp.mapping.preset.insert({
-    ['<C-Space>'] = cmp.mapping.complete(),
-    ['<Tab>'] = cmp_action.luasnip_supertab(),
-    ['<S-Tab>'] = cmp_action.luasnip_shift_supertab(),
-  })
-})
+-- local cmp = require('cmp')
+--
+-- cmp.setup({
+--   mapping = cmp.mapping.preset.insert({
+--     ['<C-Space>'] = cmp.mapping.complete(),
+--     ['<Tab>'] = cmp_action.luasnip_supertab(),
+--     ['<S-Tab>'] = cmp_action.luasnip_shift_supertab(),
+--   })
+-- })
 
 
 -------------------- LSP -----------------------------------
---debug
--- vim.lsp.set_log_level("debug")
+vim.api.nvim_create_autocmd('LspAttach', {
+  callback = function(args)
+    local opts = {buffer = args.buf}
+
+    vim.keymap.set('n', '<C-Space>', '<C-x><C-o>', opts)
+    vim.keymap.set({'n', 'x'}, 'gq', '<cmd>lua vim.lsp.buf.format({async = true})<cr>', opts)
+
+    vim.keymap.set('n', 'grt', '<cmd>lua vim.lsp.buf.type_definition()<cr>', opts)
+    vim.keymap.set('n', 'grd', '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
+
+    vim.keymap.set('n', 'grr', '<cmd>Telescope lsp_references<cr>', {buffer = args.buf, desc = "Go to References"})
+    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, {buffer = args.buf, desc = "Go to Definition"})
+  end,
+})
+-- lsp_zero.on_attach(function(client, bufnr)
+--     -- See :help lsp-zero-keybindings
+--     lsp_zero.default_keymaps({buffer = bufnr, preserve_mappings = False})
+--     -- vim.keymap.set('n', 'gq', vim.diagnostic.setloclist, {buffer = bufnr, desc = "Open Location List"})
+--     -- vim.keymap.set('n', 'gl', vim.diagnostic.open_float, {buffer = bufnr, desc = "Open Diagnostics Float"})
+--     -- Toggle LocList
+--     -- vim.keymap.set("n", "gq", function()
+--     --     vim.diagnostic.setloclist({ open = false }) -- don't open and focus
+--     --     local window = vim.api.nvim_get_current_win()
+--     --     vim.cmd.lwindow() -- open+focus loclist if has entries, else close -- this is the magic toggle command
+--     --     vim.api.nvim_set_current_win(window) -- restore focus to window you were editing (delete this if you want to stay in loclist)
+--     -- end, { buffer = bufnr , desc = "Open Diagnostics List"})
 --
-local lsp_zero = require('lsp-zero')
--- lsp_zero.extend_lspconfig()
+--
+--     lsp_zero.buffer_autoformat()
+--     vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+--         pattern = { "*.py" },
+--         callback = function()
+--             vim.lsp.buf.code_action {
+--             context = {
+--                 only = { 'source.organizeImports.ruff' },
+--             },
+--             apply = true,
+--             }
+--         end,
+--     })
+--
+--     -- vim.cmd [[autocmd BufWritePre <buffer> lua vim.lsp.buf.format() ]]
+--     -- vim.api.nvim_create_autocmd(
+--     --     { "BufWritePre" },
+--     --     {
+--     --         -- group = augroup_id,
+--     --         buffer = bufnr,
+--     --         callback = function()
+--     --             require("lsp-format-modifications").format_modifications(client, bufnr)
+--     --         end,
+--     --     }
+--     -- )
+-- end)
 
-lsp_zero.on_attach(function(client, bufnr)
-    -- See :help lsp-zero-keybindings
-    lsp_zero.default_keymaps({buffer = bufnr, preserve_mappings = False})
-    vim.keymap.set('n', 'gr', '<cmd>Telescope lsp_references<cr>', {buffer = bufnr, desc = "Go to References"})
-    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, {buffer = bufnr, desc = "Go to Definition"})
-    -- vim.keymap.set('n', 'gq', vim.diagnostic.setloclist, {buffer = bufnr, desc = "Open Location List"})
-    -- vim.keymap.set('n', 'gl', vim.diagnostic.open_float, {buffer = bufnr, desc = "Open Diagnostics Float"})
-    -- Toggle LocList
-    -- vim.keymap.set("n", "gq", function()
-    --     vim.diagnostic.setloclist({ open = false }) -- don't open and focus
-    --     local window = vim.api.nvim_get_current_win()
-    --     vim.cmd.lwindow() -- open+focus loclist if has entries, else close -- this is the magic toggle command
-    --     vim.api.nvim_set_current_win(window) -- restore focus to window you were editing (delete this if you want to stay in loclist)
-    -- end, { buffer = bufnr , desc = "Open Diagnostics List"})
-
-
-    lsp_zero.buffer_autoformat()
-    vim.api.nvim_create_autocmd({ "BufWritePost" }, {
-        pattern = { "*.py" },
-        callback = function()
-            vim.lsp.buf.code_action {
-            context = {
-                only = { 'source.organizeImports.ruff' },
-            },
-            apply = true,
-            }
-        end,
-    })
-
-    -- vim.cmd [[autocmd BufWritePre <buffer> lua vim.lsp.buf.format() ]]
-    -- vim.api.nvim_create_autocmd(
-    --     { "BufWritePre" },
-    --     {
-    --         -- group = augroup_id,
-    --         buffer = bufnr,
-    --         callback = function()
-    --             require("lsp-format-modifications").format_modifications(client, bufnr)
-    --         end,
-    --     }
-    -- )
-end)
-
-local lspconfig = require('lspconfig')
-lspconfig.pyright.setup {
+vim.lsp.config('pyright', {
   settings = {
     pyright = {
       -- Using Ruff's import organizer
@@ -272,24 +261,28 @@ lspconfig.pyright.setup {
         ignore = { '*' },
       },
     },
-  },
-}
-lspconfig.autotools_ls.setup{}
-local ruff_config_path = vim.loop.cwd() .. '/pyproject.toml'
-lspconfig.ruff.setup({
-    init_options = {
-        settings = {
-            format = {
-                args = { "--config", ruff_config_path }
-            },
-            lint = {
-                args = { "--config", ruff_config_path }
-            }
-        }
-    }
+  }
 })
--- vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, {desc = "Open Float"})
--- vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, {desc = "Open Location List"})
+
+vim.lsp.enable('pyright')
+
+vim.lsp.enable('autotools_ls')
+
+-- local ruff_config_path = vim.loop.cwd() .. '/pyproject.toml'
+vim.lsp.config('ruff', {
+    -- init_options = {
+    --     settings = {
+    --         format = {
+    --             args = { "--config", ruff_config_path }
+    --         },
+    --         lint = {
+    --             args = { "--config", ruff_config_path }
+    --         }
+    --     }
+    -- }
+})
+
+vim.lsp.enable('ruff')
 
 
 -------------------- Lualine --------------------------------
@@ -304,7 +297,7 @@ require('lualine').setup {
 }
 
 -------------------- Tmuxline --------------------------------
--- vim.g['tmuxline_theme'] = 'vim_statusline_1'
+vim.g['tmuxline_theme'] = 'vim_statusline_1'
 
 require 'nvim-web-devicons'.setup()
 
@@ -364,13 +357,29 @@ vim.keymap.set('n', '<leader>f/', builtin.current_buffer_fuzzy_find, {desc="Curr
 -- })
 
 ---- Trouble ---
-require("trouble").setup(
-{
-  modes = {
-    diagnostics_buffer = {
-      mode = "diagnostics", -- inherit from diagnostics mode
-      filter = { buf = 0 }, -- filter diagnostics to the current buffer
+require("trouble").setup({
+    modes = {
+        diagnostics_buffer = {
+            mode = "diagnostics", -- inherit from diagnostics mode
+            filter = { buf = 0 }, -- filter diagnostics to the current buffer
+        },
+    }
+})
+
+require("conform").setup({
+    formatters_by_ft = { 
+        python = {
+            -- To fix auto-fixable lint errors.
+            "ruff_fix",
+            -- To run the Ruff formatter.
+            "ruff_format",
+            -- To organize the imports.
+            "ruff_organize_imports", 
+        },
     },
-  }
-}
-)
+    format_on_save = {
+        -- These options will be passed to conform.format()
+        timeout_ms = 500,
+        lsp_format = "fallback",
+    },
+})
