@@ -163,6 +163,7 @@ map('n', '<leader>g', '<cmd>Git ++curwin<CR>', {desc = "Git"})
 
 -- show current path --
 map('n', '<leader>p', '<cmd>echo expand("%:p")<CR>', {desc = "Show current path"})
+
 -------------------- COMMENT -------------------------------
 require('Comment').setup()
 
@@ -209,45 +210,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
     vim.keymap.set('n', 'gd', vim.lsp.buf.definition, {buffer = args.buf, desc = "Go to Definition"})
   end,
 })
--- lsp_zero.on_attach(function(client, bufnr)
---     -- See :help lsp-zero-keybindings
---     lsp_zero.default_keymaps({buffer = bufnr, preserve_mappings = False})
---     -- vim.keymap.set('n', 'gq', vim.diagnostic.setloclist, {buffer = bufnr, desc = "Open Location List"})
---     -- vim.keymap.set('n', 'gl', vim.diagnostic.open_float, {buffer = bufnr, desc = "Open Diagnostics Float"})
---     -- Toggle LocList
---     -- vim.keymap.set("n", "gq", function()
---     --     vim.diagnostic.setloclist({ open = false }) -- don't open and focus
---     --     local window = vim.api.nvim_get_current_win()
---     --     vim.cmd.lwindow() -- open+focus loclist if has entries, else close -- this is the magic toggle command
---     --     vim.api.nvim_set_current_win(window) -- restore focus to window you were editing (delete this if you want to stay in loclist)
---     -- end, { buffer = bufnr , desc = "Open Diagnostics List"})
---
---
---     lsp_zero.buffer_autoformat()
---     vim.api.nvim_create_autocmd({ "BufWritePost" }, {
---         pattern = { "*.py" },
---         callback = function()
---             vim.lsp.buf.code_action {
---             context = {
---                 only = { 'source.organizeImports.ruff' },
---             },
---             apply = true,
---             }
---         end,
---     })
---
---     -- vim.cmd [[autocmd BufWritePre <buffer> lua vim.lsp.buf.format() ]]
---     -- vim.api.nvim_create_autocmd(
---     --     { "BufWritePre" },
---     --     {
---     --         -- group = augroup_id,
---     --         buffer = bufnr,
---     --         callback = function()
---     --             require("lsp-format-modifications").format_modifications(client, bufnr)
---     --         end,
---     --     }
---     -- )
--- end)
 
 vim.lsp.config('pyright', {
   settings = {
@@ -259,7 +221,8 @@ vim.lsp.config('pyright', {
       analysis = {
         -- Ignore all files for analysis to exclusively use Ruff for linting
         ignore = { '*' },
-      },
+      }, 
+      pythonPath = ".venv/bin/python",
     },
   }
 })
@@ -327,10 +290,31 @@ wk.add({
 g.neo_tree_remove_legacy_commands = 1
 map('n', '<leader>nt', '<cmd>Neotree<CR>', {desc = "Neotree"})
 map('n', '<leader>nf', '<cmd>Neotree position=float<CR>', {desc = "Neotree Float"})
+map('n', '<leader>nr', '<cmd>Neotree reveal position=float<CR>', {desc = "Neotree Float"})
 -- require 'neo-tree'
 
-require('leap').add_default_mappings()
+------------------- Leap ------------------------------
+require('leap')
+vim.keymap.set({'n', 'x', 'o'}, 's', '<Plug>(leap)')
+vim.keymap.set('n',             'S', '<Plug>(leap-from-window)')
+require('leap').opts.preview = function (ch0, ch1, ch2)
+  return not (
+    ch1:match('%s')
+    or (ch0:match('%a') and ch1:match('%a') and ch2:match('%a'))
+  )
+end
 
+-- Define equivalence classes for brackets and quotes, in addition to
+-- the default whitespace group:
+require('leap').opts.equivalence_classes = {
+  ' \t\r\n', '([{', ')]}', '\'"`'
+}
+
+-- Use the traversal keys to repeat the previous motion without
+-- explicitly invoking Leap:
+require('leap.user').set_repeat_keys('<enter>', '<backspace>')
+
+------------------- Telescope ------------------------------
 local builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>ff', builtin.find_files, {desc="Find Files"})
 vim.keymap.set('n', '<leader>fg', builtin.live_grep, {desc="Live Grep"})
@@ -377,9 +361,28 @@ require("conform").setup({
             "ruff_organize_imports", 
         },
     },
-    format_on_save = {
-        -- These options will be passed to conform.format()
-        timeout_ms = 500,
-        lsp_format = "fallback",
-    },
+    format_on_save = function(bufnr)
+        -- Disable with a global or buffer-local variable
+        if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
+            return
+        end
+            return { timeout_ms = 500, lsp_format = "fallback" }
+    end,
+})
+vim.api.nvim_create_user_command("FormatDisable", function(args)
+  if args.bang then
+    -- FormatDisable! will disable formatting just for this buffer
+    vim.b.disable_autoformat = true
+  else
+    vim.g.disable_autoformat = true
+  end
+end, {
+  desc = "Disable autoformat-on-save",
+  bang = true,
+})
+vim.api.nvim_create_user_command("FormatEnable", function()
+  vim.b.disable_autoformat = false
+  vim.g.disable_autoformat = false
+end, {
+  desc = "Re-enable autoformat-on-save",
 })
