@@ -55,6 +55,15 @@ require("lazy").setup({
         cmd = { 'Fugit2', 'Fugit2Diff', 'Fugit2Graph' },
         keys = {
             { '<leader>gg', mode = 'n', '<cmd>Fugit2<cr>' }
+        }, 
+        rocks = { enabled = false },
+    },
+    {
+        'sindrets/diffview.nvim',
+        dependencies = { 'nvim-tree/nvim-web-devicons' },
+        -- lazy, only load diffview by these commands
+        cmd = {
+            'DiffviewFileHistory', 'DiffviewOpen', 'DiffviewClose', 'DiffviewToggleFiles', 'DiffviewFocusFiles', 'DiffviewRefresh',
         }
     },
 
@@ -77,7 +86,6 @@ require("lazy").setup({
     {'tpope/vim-rhubarb'},
     {'tpope/vim-eunuch'},
     {'ggandor/leap.nvim'},
-    {'sindrets/diffview.nvim'},
 
     -- Neotree
     {"nvim-neo-tree/neo-tree.nvim", branch = "v3.x"},
