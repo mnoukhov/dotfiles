@@ -64,7 +64,15 @@ require("lazy").setup({
         -- lazy, only load diffview by these commands
         cmd = {
             'DiffviewFileHistory', 'DiffviewOpen', 'DiffviewClose', 'DiffviewToggleFiles', 'DiffviewFocusFiles', 'DiffviewRefresh',
-        }
+        },
+        keymaps = {
+		file_panel = {
+		    ['gf'] = function()
+			actions.goto_file()
+			vim.cmd 'tabclose #'
+		    end,
+	    },
+	},
     },
 
     -- motions and ux
@@ -82,16 +90,27 @@ require("lazy").setup({
             },
         },
     },
+    {
+        "folke/zen-mode.nvim",
+        opts = {
+            window = {
+                options = {
+                    wrap = true,
+                    linebreak = true,
+                    breakindent = true,
+                },
+            },
+        },
+    },
     {'tpope/vim-fugitive'},
     {'tpope/vim-rhubarb'},
     {'tpope/vim-eunuch'},
-    {'ggandor/leap.nvim'},
+    {url = "https://codeberg.org/andyg/leap.nvim"},
 
     -- Neotree
     {"nvim-neo-tree/neo-tree.nvim", branch = "v3.x"},
 
     -- style
-    {'junegunn/goyo.vim'},
     {'junegunn/seoul256.vim'},
     -- {'shaunsingh/seoul256.nvim'},
 
@@ -272,7 +291,7 @@ require('lualine').setup {
 }
 
 -------------------- Tmuxline --------------------------------
-vim.g['tmuxline_theme'] = 'vim_statusline_1'
+vim.g['tmuxline_theme'] = 'vim_statusline_3'
 
 require 'nvim-web-devicons'.setup()
 
