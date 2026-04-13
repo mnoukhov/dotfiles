@@ -310,6 +310,7 @@ vim.lsp.enable({
     'autotools_ls',
     'pyright',
     'ruff',
+    'ty',
 })
 
 
