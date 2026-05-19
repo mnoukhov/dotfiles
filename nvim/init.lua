@@ -290,25 +290,8 @@ vim.api.nvim_create_autocmd('LspAttach', {
   end,
 })
 
-vim.lsp.config('pyright', {
-  settings = {
-    pyright = {
-      -- Using Ruff's import organizer
-      disableOrganizeImports = true,
-    },
-    python = {
-      analysis = {
-        -- Ignore all files for analysis to exclusively use Ruff for linting
-        ignore = { '*' },
-      }, 
-      pythonPath = ".venv/bin/python",
-    },
-  }
-})
-
 vim.lsp.enable({
     'autotools_ls',
-    'pyright',
     'ruff',
     'ty',
 })
