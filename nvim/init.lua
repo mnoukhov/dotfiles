@@ -45,7 +45,7 @@ vim.pack.add({
     gh("nvim-treesitter/nvim-treesitter-textobjects"),
 
     -- Telescope
-    { src = gh("nvim-telescope/telescope.nvim"), version = vim.version.range("0.1") },
+    gh("nvim-telescope/telescope.nvim"),
     gh("SuperBo/fugit2.nvim"),
     gh("chrisgrieser/nvim-tinygit"),
     gh("sindrets/diffview.nvim"),
@@ -283,6 +283,12 @@ map('n', '<leader>fs', builtin.grep_string, {desc="Grep String under Cursor"})
 map('n', '<leader>f;', builtin.jumplist, {desc="Find Jumplist"})
 map('n', '<leader>f/', builtin.current_buffer_fuzzy_find, {desc="Current Buffer Fuzzy Find"})
 
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "TelescopePrompt",
+  callback = function()
+    vim.opt_local.autocomplete = false
+  end,
+})
 
 ---- Diffview ---
 require("diffview").setup({
