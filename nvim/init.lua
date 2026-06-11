@@ -113,12 +113,26 @@ map('i', 'jj', '<Esc>', { desc = "Exit insert mode" })
 map('n', ';;', '<cmd>w<CR>', { desc = "Write buffer" })
 map('n', '<Esc>', '<cmd>noh<CR>', { desc = "Clear search highlight" })
 
-map('i', '<Tab>', function()
-    return vim.fn.pumvisible() == 1 and '<C-n>' or '<Tab>'
-end, { expr = true, desc = "Next completion item" })
-map('i', '<S-Tab>', function()
-    return vim.fn.pumvisible() == 1 and '<C-p>' or '<S-Tab>'
-end, { expr = true, desc = "Previous completion item" })
+map({ 'i', 's' }, '<Tab>', function()
+    local ls = require("luasnip")
+    if vim.fn.pumvisible() == 1 then
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-n>', true, false, true), 'n', false)
+    elseif ls.expand_or_jumpable() then
+        ls.expand_or_jump()
+    else
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Tab>', true, false, true), 'n', false)
+    end
+end, { silent = true, desc = "Completion / snippet expand or jump" })
+map({ 'i', 's' }, '<S-Tab>', function()
+    local ls = require("luasnip")
+    if vim.fn.pumvisible() == 1 then
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-p>', true, false, true), 'n', false)
+    elseif ls.jumpable(-1) then
+        ls.jump(-1)
+    else
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<S-Tab>', true, false, true), 'n', false)
+    end
+end, { silent = true, desc = "Completion / snippet jump back" })
 map('i', '<C-Space>', function()
     vim.lsp.completion.get()
 end, { desc = "Trigger LSP completion" })
@@ -133,6 +147,11 @@ map('n', '<leader>p', '<cmd>echo expand("%:p")<CR>', {desc = "Show current path"
 map("n", "<leader>?", function()
     require("which-key").show({ global = false })
 end, { desc = "Buffer Local Keymaps (which-key)" })
+
+-------------------- LuaSnip --------------------------------
+require("luasnip.loaders.from_lua").load({
+    paths = vim.fn.stdpath("config") .. "/nvim/LuaSnip",
+})
 
 -------------------- COMMENT -------------------------------
 require('Comment').setup()
@@ -153,6 +172,24 @@ require("zen-mode").setup({
             breakindent = true,
         },
     },
+    on_open = function()
+        vim.opt.autocomplete = false
+        local bufnr = vim.api.nvim_get_current_buf()
+        for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+            if client:supports_method("textDocument/completion") then
+                vim.lsp.completion.enable(true, client.id, bufnr, { autotrigger = false })
+            end
+        end
+    end,
+    on_close = function()
+        vim.opt.autocomplete = true
+        local bufnr = vim.api.nvim_get_current_buf()
+        for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+            if client:supports_method("textDocument/completion") then
+                vim.lsp.completion.enable(true, client.id, bufnr, { autotrigger = true })
+            end
+        end
+    end,
 })
 
 -------------------- TREE-SITTER ---------------------------
